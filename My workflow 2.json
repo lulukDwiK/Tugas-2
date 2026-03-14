@@ -1,0 +1,204 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=Kamu adalah agen AI untuk pemasaran pelatihan NF Academy (NFA).\n\nTugasmu adalah menjawab pertanyaan calon peserta tentang pelatihan yang tersedia di NF Academy berdasarkan data berikut.\n\nProgram Bootcamp:\n- Digital Marketing\n- Network Engineering\n- Web Development\n- Mobile Programming\n- Codeless Data Science\n- DevOps Engineer\n\nProgram Skill Up:\n- Video Editing dan Youtube Content Creator\n- Python Programming\n- PHP Programming\n- Laravel Framework\n- Linux System dan Network Administration\n- Mikrotik Network\n- SNI ISO/IEC 27001:2022\n- Office Application (MS Office)\n- Digital Marketing - Web dan SEO\n\nJika pengguna bertanya tentang pelatihan di atas, berikan penjelasan singkat tentang pelatihan tersebut.\n\nJika pengguna bertanya tentang pelatihan yang tidak ada dalam daftar tersebut, jawab dengan sopan bahwa pelatihan tersebut tidak tersedia di NF Academy dan sarankan pelatihan yang paling mendekati dari daftar yang ada."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b00ea0ea-9574-49e9-82ca-3d74d61b3c3b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        96,
+        208
+      ],
+      "id": "6656e61d-ef41-42d9-a946-5ba1bc8125cd",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "A2k7xC53Rg8AiTAD",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1tsyZARH5CIXXBTrLq3x2lnWUlWc7j1PHhZY3odcPt7w",
+          "mode": "list",
+          "cachedResultName": "n8n banget",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1tsyZARH5CIXXBTrLq3x2lnWUlWc7j1PHhZY3odcPt7w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 223670131,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1tsyZARH5CIXXBTrLq3x2lnWUlWc7j1PHhZY3odcPt7w/edit#gid=223670131"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        208
+      ],
+      "id": "cf7d7a47-907e-4f66-8d50-154117cbcbc4",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PAnPx4bjHEdqbSSt",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id.toString() }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        272,
+        208
+      ],
+      "id": "21c7e350-c285-49e2-b339-19547fe48200",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        16,
+        0
+      ],
+      "id": "131f3099-4786-4630-8793-f8b9168bd057",
+      "name": "Telegram Trigger",
+      "webhookId": "fc75ca41-8c5f-4de6-946d-e771cd53d070",
+      "credentials": {
+        "telegramApi": {
+          "id": "gVyu31sHtQpQdkLq",
+          "name": "n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "816cf415-315e-4a4e-8acc-ad7f2b3f7bfe",
+      "name": "Send a text message",
+      "webhookId": "759ba049-ee2a-449b-ba01-2cc559166a7d",
+      "credentials": {
+        "telegramApi": {
+          "id": "gVyu31sHtQpQdkLq",
+          "name": "n8n"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b73f1917-13f5-42a2-b9d1-801f61b6108c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "56459fc98fce519c0c2717436eb7e5c02f8c27b6cacf7c4b3834e41335416be7"
+  },
+  "id": "tkbNvuulS1wqHY6y",
+  "tags": []
+}
